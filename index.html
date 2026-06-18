@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>송쌤과학 시험 검증기 · 정답 분포 & 배점 구성</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root{
+    --blue:#0F6FB8; --blue-dark:#0a4f84; --blue-soft:#E8F2FB;
+    --pink:#FFB7B2; --pink-soft:#FFE7E4;
+    --ink:#1b2a3a; --paper:#FAFBFD; --card:#ffffff;
+    --line:#E3E9F0; --muted:#6b7c8f;
+    --green:#1f9d6b; --green-soft:#E4F5EC;
+    --amber:#E0902A; --amber-soft:#FBEFDC;
+    --red:#D6453D; --red-soft:#FBE3E1;
+    --shadow:0 6px 24px rgba(15,111,184,.08);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:
+      radial-gradient(1200px 500px at 100% -10%, var(--pink-soft) 0%, transparent 55%),
+      radial-gradient(1100px 600px at -10% 0%, var(--blue-soft) 0%, transparent 50%),
+      var(--paper);
+    color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px}
+
+  /* Header */
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{width:54px;height:54px;border-radius:15px;flex:none;background:linear-gradient(135deg,var(--blue),var(--blue-dark));display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 18px rgba(15,111,184,.28);letter-spacing:-.5px;position:relative;overflow:hidden}
+  .mark::after{content:"";position:absolute;right:-10px;top:-10px;width:26px;height:26px;border-radius:50%;background:var(--pink);opacity:.9}
+  .mark span{position:relative;z-index:1;text-align:center;line-height:1.05}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.6px}
+  h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0;margin-top:3px}
+  .links{display:flex;gap:8px;align-items:center}
+  .links a{font-size:12.5px;font-weight:700;color:var(--blue);text-decoration:none;background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:999px;transition:.15s}
+  .links a:hover{border-color:var(--blue);background:var(--blue-soft)}
+
+  /* Sticky status bar */
+  .statusbar{position:sticky;top:8px;z-index:60;background:rgba(255,255,255,.93);backdrop-filter:blur(10px);border:1.5px solid #d4e4f3;border-radius:14px;box-shadow:0 8px 26px rgba(15,111,184,.14);padding:11px 16px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+  .stat{display:flex;align-items:center;gap:9px}
+  .stat .lab{font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
+  .stat .big{font-size:19px;font-weight:800;color:var(--ink);white-space:nowrap}
+  .stat .big b{color:var(--blue)}
+  .stat .big.done b{color:var(--green)}
+  .divider{width:1px;height:28px;background:var(--line)}
+  .tiers{display:flex;gap:6px;flex-wrap:wrap}
+  .tier-chip{font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dark);white-space:nowrap}
+  .tier-chip.full{background:var(--green-soft);color:#147a51}
+  .sb-total{margin-left:auto}
+
+  /* Settings */
+  .settings{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px}
+  .settings h3{font-size:14px;font-weight:800;margin-bottom:4px}
+  .settings .sub{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px}
+  .plan{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .planrow{display:flex;align-items:center;gap:8px}
+  .planrow .num{width:74px;font-family:inherit;font-size:16px;font-weight:800;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;text-align:center;background:#fff}
+  .planrow .num:focus{outline:none;border-color:var(--blue)}
+  .planrow .u{font-size:13px;font-weight:700;color:var(--muted)}
+  .planrow .eq{font-size:13px;font-weight:800;color:var(--blue);margin-left:4px;min-width:54px}
+  .planrow .del{width:34px;height:38px;border:1.5px solid var(--line);background:#fff;border-radius:10px;color:var(--muted);font-size:16px;cursor:pointer;margin-left:auto}
+  .planrow .del:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+  .planfoot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:4px}
+  .btn{font-family:inherit;font-weight:700;font-size:13.5px;border-radius:10px;padding:10px 15px;cursor:pointer;border:1.5px solid transparent;transition:.15s}
+  .btn-add{background:#fff;border-color:var(--blue);color:var(--blue)}
+  .btn-add:hover{background:var(--blue-soft)}
+  .btn-ghost{background:#fff;border-color:var(--line);color:var(--muted)}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+  .btn-pink{background:var(--pink);color:#7a3b36;border-color:var(--pink)}
+  .btn-pink:hover{filter:brightness(.97)}
+  .plansum{font-size:13.5px;font-weight:800;color:var(--ink);background:var(--blue-soft);padding:9px 14px;border-radius:10px}
+  .plansum b{color:var(--blue)}
+  .actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+  /* 배점 추천 */
+  .recbar{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:12px}
+  .recbar .field{display:flex;flex-direction:column;gap:6px}
+  .recbar .field label{font-size:12px;font-weight:700;color:var(--muted)}
+  .recbar .num{width:84px;font-family:inherit;font-size:16px;font-weight:800;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;text-align:center;background:#fff}
+  .recbar .num:focus{outline:none;border-color:var(--blue)}
+  .recs{display:flex;flex-direction:column;gap:8px}
+  .reccard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;background:#fff;transition:.15s}
+  .reccard:hover{border-color:#cfe2f3}
+  .reccard .tag{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;flex:none}
+  .reccard .tag.bal{background:var(--green-soft);color:#147a51}
+  .reccard .tag.diff{background:var(--blue-soft);color:var(--blue-dark)}
+  .reccard .tag.simple{background:#f1f4f8;color:var(--muted)}
+  .reccard .desc{font-size:14.5px;font-weight:800;color:var(--ink)}
+  .reccard .meta{font-size:12px;color:var(--muted);font-weight:700}
+  .reccard .apply{margin-left:auto;font-family:inherit;font-weight:800;font-size:13px;border:1.5px solid var(--blue);background:var(--blue);color:#fff;border-radius:9px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .reccard .apply:hover{background:var(--blue-dark)}
+  .recmsg{font-size:13px;font-weight:700;color:#9c6311;background:var(--amber-soft);padding:11px 14px;border-radius:11px}
+  .rec-divider{height:1px;background:var(--line);margin:18px 0}
+
+  /* 출제 분담 */
+  .split-panel{margin-bottom:20px}
+  .splitctrl{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+  .splitctrl .field{display:flex;flex-direction:column;gap:6px}
+  .splitctrl .field label{font-size:12px;font-weight:700;color:var(--muted)}
+  .splitctrl .ctrl{display:flex;align-items:center;gap:6px}
+  .tstep{width:34px;height:38px;border:1.5px solid var(--line);background:#fff;border-radius:10px;font-size:18px;font-weight:800;color:var(--blue);cursor:pointer;line-height:1}
+  .tstep:hover{background:var(--blue-soft);border-color:var(--blue)}
+  .tcount{width:58px;font-family:inherit;font-size:16px;font-weight:800;text-align:center;border:1.5px solid var(--line);border-radius:10px;padding:9px 6px;color:var(--ink);background:#fff}
+  .splitnote{font-size:12.5px;color:var(--muted);font-weight:600;max-width:460px}
+  .teachers{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
+  .tcard{border:1.5px solid var(--line);border-radius:13px;padding:13px 14px;background:#fff}
+  .tcard-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .tbadge{font-size:12px;font-weight:800;color:#fff;background:var(--blue);padding:4px 10px;border-radius:999px;flex:none}
+  .tbadge.t2{background:var(--pink);color:#7a3b36}.tbadge.t3{background:#7BC4A4}.tbadge.t4{background:#C9A0DC}.tbadge.t5{background:var(--amber)}.tbadge.t6{background:#5a6b7d}
+  .frac{display:flex;align-items:center;gap:3px}
+  .frac input{width:40px;font-family:inherit;font-size:15px;font-weight:800;text-align:center;border:1.5px solid var(--line);border-radius:8px;padding:5px 3px;color:var(--ink);background:#fff}
+  .frac input:focus{outline:none;border-color:var(--blue)}
+  .frac span{font-weight:800;color:var(--muted)}
+  .share{margin-left:auto;font-size:13px;font-weight:800;color:var(--blue)}
+  .tcard-main{font-size:14px;font-weight:700;color:var(--muted)}
+  .tcard-main b{font-size:22px;font-weight:800;color:var(--ink)}
+  .ttarget{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .tchips{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px}
+  .tchip{font-size:11.5px;font-weight:800;background:var(--blue-soft);color:var(--blue-dark);padding:4px 9px;border-radius:999px}
+  .splitfoot{margin-top:12px;font-size:13px;font-weight:800;background:var(--blue-soft);color:var(--blue-dark);padding:10px 14px;border-radius:10px}
+  .splitfoot.warn{background:var(--amber-soft);color:#9c6311}
+  .seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:40px}
+  .seg button{font-family:inherit;font-weight:800;font-size:13px;border:none;background:#fff;color:var(--muted);padding:0 14px;cursor:pointer;transition:.12s}
+  .seg button.on{background:var(--blue);color:#fff}
+  .range{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
+  .range input{width:48px;font-family:inherit;font-size:14px;font-weight:800;text-align:center;border:1.5px solid var(--line);border-radius:8px;padding:5px 3px;color:var(--ink);background:#fff}
+  .range input:focus{outline:none;border-color:var(--blue)}
+  .tratio{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .adist{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:9px}
+  .acell{text-align:center;border:1px solid var(--line);border-radius:7px;padding:4px 1px}
+  .acell .ao{display:block;font-size:12px;font-weight:800;color:var(--blue)}
+  .acell .ac{display:block;font-size:12.5px;font-weight:800}
+  .acell .ap{display:block;font-size:9.5px;color:var(--muted);font-weight:700}
+  .averdict{margin-top:8px;font-size:11.5px;font-weight:800;padding:5px 9px;border-radius:8px;display:inline-block}
+  .av-good{background:var(--green-soft);color:#147a51}
+  .av-ok{background:var(--blue-soft);color:var(--blue-dark)}
+  .av-warn{background:var(--amber-soft);color:#9c6311}
+  .av-bad{background:var(--red-soft);color:#a82e27}
+  .av-n{background:#f1f4f8;color:var(--muted)}
+  .ratio-mini{font-size:12px;color:var(--muted);font-weight:700}
+  .tierbar{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:#f7fafd;border:1px solid var(--line);border-radius:11px}
+  .tb-chip{font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dark)}
+  .tb-chip.ok{background:var(--green-soft);color:#147a51}
+  .tb-chip.over{background:var(--red-soft);color:#a82e27}
+  .tb-chip.under{background:var(--amber-soft);color:#9c6311}
+  .tb-auto{margin-left:auto;font-family:inherit;font-weight:800;font-size:12.5px;border:1.5px solid var(--blue);background:#fff;color:var(--blue);border-radius:9px;padding:7px 13px;cursor:pointer;transition:.12s}
+  .tb-auto:hover{background:var(--blue-soft)}
+  .ptgrid{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .ptrow{display:flex;align-items:center;gap:8px}
+  .ptrow.avoided{opacity:.5}
+  .ptrow .ptlab{font-size:13px;font-weight:800;color:var(--ink);width:36px}
+  .ptrow .ptcount{width:56px;font-family:inherit;font-size:14px;font-weight:800;text-align:center;border:1.5px solid var(--line);border-radius:8px;padding:6px 4px;color:var(--ink);background:#fff}
+  .ptrow .ptcount:focus{outline:none;border-color:var(--blue)}
+  .ptrow .ptcount:disabled{background:#f4f6f9}
+  .ptavoid{margin-left:auto;font-family:inherit;font-size:11px;font-weight:800;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;padding:6px 10px;cursor:pointer;transition:.12s}
+  .ptavoid:hover{border-color:#e7b3af;color:#a82e27}
+  .ptavoid.on{background:var(--red-soft);border-color:#e7b3af;color:#a82e27}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .panel-h{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .panel-h h2{font-size:15px;font-weight:800;letter-spacing:-.3px}
+  .panel-h .hint{font-size:11.5px;color:var(--muted);font-weight:600}
+  .panel-b{padding:16px 18px}
+
+  /* Question cards */
+  .qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(282px,1fr));gap:10px}
+  .qcard{border:1.5px solid var(--line);border-radius:13px;padding:11px 12px;background:#fff;transition:.15s}
+  .qcard.done{border-color:#cfe2f3;background:linear-gradient(0deg,#fff,#fcfdff)}
+  .qcard-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .qnum{width:30px;height:30px;flex:none;border-radius:9px;background:var(--blue-soft);color:var(--blue-dark);font-weight:800;font-size:13px;display:grid;place-items:center}
+  .qcard.done .qnum{background:var(--blue);color:#fff}
+  .ptsbtns{margin-left:auto;display:flex;gap:4px}
+  .pbtn{min-width:34px;height:30px;padding:0 6px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-size:12.5px;font-weight:800;cursor:pointer;transition:.12s}
+  .pbtn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+  .pbtn.sel{background:var(--pink);border-color:var(--pink);color:#7a3b36}
+  .pbtn:disabled{opacity:.32;cursor:not-allowed;background:#f4f6f9}
+  .opts{display:flex;gap:5px}
+  .opt{flex:1;height:34px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-size:16px;font-weight:700;cursor:pointer;transition:.12s;display:grid;place-items:center}
+  .opt:hover{border-color:var(--blue);color:var(--blue)}
+  .opt.sel{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(15,111,184,.25)}
+
+  /* Results */
+  .results{position:sticky;top:74px;display:flex;flex-direction:column;gap:16px}
+  .verdict{border-radius:12px;padding:12px 14px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:9px}
+  .verdict .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .v-good{background:var(--green-soft);color:#147a51}.v-good .dot{background:var(--green)}
+  .v-ok{background:var(--blue-soft);color:var(--blue-dark)}.v-ok .dot{background:var(--blue)}
+  .v-warn{background:var(--amber-soft);color:#9c6311}.v-warn .dot{background:var(--amber)}
+  .v-bad{background:var(--red-soft);color:#a82e27}.v-bad .dot{background:var(--red)}
+  .v-neutral{background:#f1f4f8;color:var(--muted)}.v-neutral .dot{background:var(--muted)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:160px;padding:8px 4px 0;position:relative;margin-top:6px}
+  .ideal{position:absolute;left:0;right:0;border-top:1.5px dashed var(--pink);pointer-events:none}
+  .ideal span{position:absolute;right:0;top:-9px;font-size:10px;font-weight:800;color:#d98a84;background:#fff;padding:0 4px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+  .bar-val{font-size:11px;font-weight:800;color:var(--blue-dark)}
+  .bar{width:100%;max-width:42px;border-radius:7px 7px 0 0;background:linear-gradient(0deg,var(--blue),#3b93d4);min-height:3px;transition:height .35s cubic-bezier(.2,.8,.2,1)}
+  .bar.hot{background:linear-gradient(0deg,#e8893f,var(--amber))}
+  .bar.zero{background:repeating-linear-gradient(45deg,#eef2f6,#eef2f6 5px,#e3e9f0 5px,#e3e9f0 10px)}
+  .bar-lab{font-size:17px;font-weight:800;color:var(--ink)}
+  .legend{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+  .lg{text-align:center;border:1px solid var(--line);border-radius:9px;padding:6px 2px}
+  .lg .o{font-size:14px;font-weight:800;color:var(--blue)}
+  .lg .c{font-size:13px;font-weight:800}
+  .lg .p{font-size:10.5px;color:var(--muted);font-weight:700}
+  .rows{display:flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:#fff;font-size:13px;gap:8px}
+  .row:nth-child(even){background:#fbfcfe}
+  .row .k{color:var(--muted);font-weight:700}
+  .row .v{font-weight:800;display:flex;align-items:center;gap:7px}
+  .row.total{background:var(--blue-soft);padding:11px 12px}
+  .row.total .k{color:var(--blue-dark)}
+  .row.total .v{font-size:16px;color:var(--blue-dark)}
+  .chip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
+  .chip-ok{background:var(--green-soft);color:#147a51}
+  .chip-no{background:var(--amber-soft);color:#9c6311}
+  .warns{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+  .warn{font-size:12.5px;font-weight:700;padding:9px 11px;border-radius:9px;display:flex;gap:7px;align-items:flex-start}
+  .warn-amber{background:var(--amber-soft);color:#8a5810}
+  .warn-blue{background:var(--blue-soft);color:var(--blue-dark)}
+  .warn-green{background:var(--green-soft);color:#147a51}
+  .warn .ic{flex:none;font-weight:800}
+  .btn-save{width:100%;background:var(--blue);color:#fff;border:none;font-weight:800;font-size:14px;padding:12px;border-radius:11px;cursor:pointer;transition:.15s}
+  .btn-save:hover{background:var(--blue-dark)}
+  footer{text-align:center;margin-top:30px;font-size:12px;color:var(--muted)}
+  footer b{color:var(--blue)}
+  .sectiontitle{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.4px;margin:2px 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><span>송쌤<br>과학</span></div>
+      <div><h1>시험 검증기<small>배점 구성 · 정답 번호(①~⑤) 분포 점검 · 2022 개정 교육과정</small></h1></div>
+    </div>
+    <div class="links">
+      <a href="https://www.youtube.com/@songsamscience" target="_blank">YouTube</a>
+      <a href="https://www.instagram.com/songsamscience" target="_blank">Instagram</a>
+    </div>
+  </header>
+
+  <!-- 항상 보이는 상단 고정 현황바 -->
+  <div class="statusbar" id="statusbar">
+    <div class="stat"><span class="lab">정답 선택</span><span class="big" id="ansCount"><b>0</b>/0</span></div>
+    <div class="divider"></div>
+    <div class="stat"><span class="lab">배점 배정</span><span class="big" id="ptsCount"><b>0</b>/0</span></div>
+    <div class="tiers" id="tierChips"></div>
+    <div class="stat sb-total"><span class="lab">총점</span><span class="big" id="sbTotal"><b>0</b>/0</span></div>
+  </div>
+
+  <!-- 초기 설정: 배점 구성 -->
+  <div class="settings">
+    <h3>배점 구성 추천</h3>
+    <div class="sub">총 문항 수를 입력하면 목표 총점에 맞는 배점 구성을 추천해 드려요. · <b>균형형</b> 고른 부담 · <b>변별형</b> 난이도 차이 큼 · <b>단순형</b> 2종 배점</div>
+    <div class="recbar">
+      <div class="field"><label>총 문항 수</label><input class="num" id="recN" type="number" min="1" max="80" value="28"></div>
+      <div class="field"><label>목표 총점</label><input class="num" id="recT" type="number" min="1" max="500" value="100"></div>
+    </div>
+    <div class="recs" id="recs"></div>
+    <div class="rec-divider"></div>
+    <h3>배점 구성</h3>
+    <div class="sub">"몇 점 × 몇 문항"으로 출제 계획을 세우면, 각 배점이 그 문항 수만큼만 선택되고 소진되면 자동으로 잠깁니다.</div>
+    <div class="plan" id="plan"></div>
+    <div class="planfoot">
+      <button class="btn btn-add" id="addRow">+ 배점 추가</button>
+      <div class="plansum" id="planSum">총 0문항 · 0점</div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="autoPts">배점 자동 배정</button>
+        <button class="btn btn-pink" id="fillBtn">예시 정답 채우기</button>
+        <button class="btn btn-ghost" id="clearBtn">모두 비우기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 출제 분담 -->
+  <section class="panel split-panel">
+    <div class="panel-h"><h2>출제 분담</h2><span class="hint" id="splitBasis">기준: 28문항 · 100점</span></div>
+    <div class="panel-b">
+      <div class="splitctrl">
+        <div class="field"><label>선생님 수</label>
+          <div class="ctrl">
+            <button class="tstep" id="tMinus">−</button>
+            <input class="tcount" id="tCount" type="number" min="2" max="6" value="2" readonly>
+            <button class="tstep" id="tPlus">+</button>
+          </div>
+        </div>
+        <div class="field"><label>분담 방식</label>
+          <div class="seg" id="modeSeg">
+            <button data-mode="range" class="on">범위 지정</button>
+            <button data-mode="ratio">배분 조절</button>
+          </div>
+        </div>
+        <span class="splitnote" id="splitNote"></span>
+      </div>
+      <div class="teachers" id="teachers"></div>
+      <div class="splitfoot" id="splitFoot"></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-h"><h2>문항 입력</h2><span class="hint">배점(분홍) · 정답(파랑)</span></div>
+      <div class="panel-b"><div class="qgrid" id="qgrid"></div></div>
+    </section>
+
+    <aside class="results" id="resultCapture">
+      <section class="panel">
+        <div class="panel-h"><h2>정답 번호 분포</h2><span class="hint">균형 ≈ 각 20%</span></div>
+        <div class="panel-b">
+          <div id="verdict" class="verdict v-neutral"><span class="dot"></span><span id="verdictText">정답을 입력해 주세요</span></div>
+          <div class="chart" id="chart"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-h"><h2>배점 배정 현황</h2></div>
+        <div class="panel-b">
+          <div class="rows" id="ptsRows"></div>
+          <div class="warns" id="warns" style="margin-top:12px"></div>
+        </div>
+      </section>
+      <button class="btn-save" id="saveBtn">결과 이미지로 저장</button>
+    </aside>
+  </div>
+
+  <footer>© <b>송쌤과학</b> · 배점 구성 &amp; 정답 분포 검증 도구 · @songsamscience</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var state = {
+    plan: [ {pts:2,n:1}, {pts:3,n:10}, {pts:4,n:17} ],
+    teachers: [ {num:1,den:2}, {num:1,den:2} ],
+    splitMode: 'range',
+    ranges: [],
+    alloc: [],
+    avoid: [],
+    q: []
+  };
+  var CIRC = ['①','②','③','④','⑤'];
+
+  function totalQ(){ return state.plan.reduce(function(s,r){return s + (r.n||0);},0); }
+  function planTotal(){ return state.plan.reduce(function(s,r){return s + (r.pts||0)*(r.n||0);},0); }
+  function quotaMap(){ var m={}; state.plan.forEach(function(r){ if(r.pts>0&&r.n>0) m[r.pts]=(m[r.pts]||0)+r.n; }); return m; }
+  function usedMap(){ var m={}; state.q.forEach(function(q){ if(q.points) m[q.points]=(m[q.points]||0)+1; }); return m; }
+  function tiersSorted(){ return Object.keys(quotaMap()).map(Number).sort(function(a,b){return a-b;}); }
+
+  function resizeQ(){
+    var n=totalQ(), old=state.q;
+    state.q=[];
+    for(var i=0;i<n;i++) state.q.push(old[i] ? {points:old[i].points, answer:old[i].answer} : {points:null, answer:null});
+    validatePoints();
+  }
+  function validatePoints(){
+    var quota=quotaMap(), seen={};
+    state.q.forEach(function(q){
+      if(q.points==null) return;
+      if(!quota[q.points]){ q.points=null; return; }
+      seen[q.points]=(seen[q.points]||0)+1;
+      if(seen[q.points]>quota[q.points]) q.points=null;
+    });
+  }
+
+  // ---------- 배점 구성 추천 ----------
+  function generateRecs(N, T){
+    var pool=[2,3,4,5], sols=[];
+    function add(arr){
+      arr=arr.filter(function(t){return t[1]>0;}); arr.sort(function(a,b){return a[0]-b[0];});
+      if(!arr.length) return;
+      if(arr.reduce(function(s,t){return s+t[1];},0)!==N) return;
+      if(arr.reduce(function(s,t){return s+t[0]*t[1];},0)!==T) return;
+      sols.push(arr);
+    }
+    pool.forEach(function(v){ if(N*v===T) add([[v,N]]); });
+    for(var i=0;i<pool.length;i++)for(var j=i+1;j<pool.length;j++){
+      var a=pool[i],b=pool[j],y=(T-a*N)/(b-a),x=N-y;
+      if(Number.isInteger(y)&&x>=1&&y>=1) add([[a,x],[b,y]]);
+    }
+    for(var p=0;p<pool.length;p++)for(var q=p+1;q<pool.length;q++)for(var k=q+1;k<pool.length;k++){
+      var a2=pool[p],b2=pool[q],c=pool[k];
+      for(var z=1;z<=N-2;z++){ var rem=N-z,y2=((T-c*z)-a2*rem)/(b2-a2),x2=rem-y2;
+        if(Number.isInteger(y2)&&x2>=1&&y2>=1) add([[a2,x2],[b2,y2],[c,z]]); }
+    }
+    var seen={},uniq=[];
+    sols.forEach(function(s){var kk=s.map(function(t){return t[0]+':'+t[1];}).join('|'); if(!seen[kk]){seen[kk]=1;uniq.push(s);}});
+    if(!uniq.length) return null;
+    function minc(s){return Math.min.apply(null,s.map(function(t){return t[1];}));}
+    function spread(s){var c=s.map(function(t){return t[1];});return Math.max.apply(null,c)-Math.min.apply(null,c);}
+    function vrange(s){return s[s.length-1][0]-s[0][0];}
+    var bal=uniq.filter(function(s){return s.length===3&&(s[2][0]-s[0][0])===2;})
+                .sort(function(a,c){return minc(c)-minc(a)||spread(a)-spread(c);})[0]
+            || uniq.filter(function(s){return s.length===3;}).sort(function(a,c){return minc(c)-minc(a)||spread(a)-spread(c);})[0]
+            || uniq.slice().sort(function(a,c){return minc(c)-minc(a);})[0];
+    var diff=uniq.slice().sort(function(a,c){return vrange(c)-vrange(a)||minc(c)-minc(a);})[0];
+    var b=Math.floor(T/N),r=T-b*N,simple=null;
+    if(r===0&&pool.indexOf(b)>-1) simple=[[b,N]];
+    else if(r>0&&pool.indexOf(b)>-1&&pool.indexOf(b+1)>-1) simple=[[b,N-r],[b+1,r]];
+    var out=[],used={};
+    function push(l,s){if(!s)return;var sig=s.map(function(t){return t[0]+':'+t[1];}).join('|');if(used[sig])return;used[sig]=1;out.push({label:l,tiers:s});}
+    push('균형형',bal); push('변별형',diff); push('단순형',simple);
+    return out.slice(0,3);
+  }
+  function renderRecs(){
+    var N=Math.max(1,Math.min(80,+document.getElementById('recN').value||0));
+    var T=Math.max(1,+document.getElementById('recT').value||0);
+    var box=document.getElementById('recs');
+    var recs=generateRecs(N,T);
+    if(!recs){
+      var lo=Math.ceil(T/5), hi=Math.floor(T/2);
+      box.innerHTML='<div class="recmsg">이 문항 수로는 '+T+'점을 정수 배점(2~5점)으로 맞추기 어려워요. 권장 문항 수는 약 '+lo+'~'+hi+'문항입니다.</div>';
+      return;
+    }
+    var tg={'균형형':'bal','변별형':'diff','단순형':'simple'};
+    box.innerHTML=recs.map(function(r,i){
+      var desc=r.tiers.map(function(t){return t[0]+'점×'+t[1];}).join(' + ');
+      var c=r.tiers.reduce(function(s,t){return s+t[1];},0), pp=r.tiers.reduce(function(s,t){return s+t[0]*t[1];},0);
+      return '<div class="reccard"><span class="tag '+(tg[r.label]||'')+'">'+r.label+'</span>'+
+        '<span class="desc">'+desc+'</span><span class="meta">'+pp+'점 · '+c+'문항</span>'+
+        '<button class="apply" data-rec="'+i+'">적용</button></div>';
+    }).join('');
+    box.querySelectorAll('.apply').forEach(function(b){
+      b.addEventListener('click',function(){
+        var r=recs[+this.dataset.rec];
+        state.plan=r.tiers.map(function(t){return {pts:t[0],n:t[1]};});
+        onPlanChange();
+        document.querySelector('.settings').scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
+  }
+
+  // ---------- 출제 분담 ----------
+  var TCOLORS=['#0F6FB8','#FFB7B2','#7BC4A4','#C9A0DC','#E0902A','#5a6b7d'];
+
+  function resetRanges(){
+    var N=totalQ(), K=state.teachers.length, base=Math.floor(N/K), extra=N%K, pos=1;
+    state.ranges=[];
+    for(var i=0;i<K;i++){
+      var size=base+(i<extra?1:0);
+      if(size<=0){ state.ranges.push({start:0,end:-1}); }
+      else { state.ranges.push({start:pos,end:pos+size-1}); pos+=size; }
+    }
+  }
+  function ownerOf(idx0){
+    var qn=idx0+1;
+    for(var i=0;i<state.ranges.length;i++){ var r=state.ranges[i]; if(r&&r.start>0&&qn>=r.start&&qn<=r.end) return i; }
+    return -1;
+  }
+  function rangeStats(start,end){
+    var counts=[0,0,0,0,0], pts={}, qc=0, pSum=0, answered=0;
+    if(start>0&&end>=start){
+      for(var i=start-1;i<=end-1&&i<state.q.length;i++){
+        if(i<0) continue;
+        qc++; var q=state.q[i];
+        if(q.points){ pts[q.points]=(pts[q.points]||0)+1; pSum+=q.points; }
+        if(q.answer){ counts[q.answer-1]++; answered++; }
+      }
+    }
+    return {counts:counts,pts:pts,qc:qc,pSum:pSum,answered:answered};
+  }
+  function distVerdict(counts,answered){
+    if(answered===0) return {cls:'av-n',txt:'정답 미입력'};
+    var mx=Math.max.apply(null,counts), mn=Math.min.apply(null,counts), spread=mx-mn, hasZero=counts.indexOf(0)>-1, maxPct=mx/answered*100;
+    if(hasZero&&answered>=8) return {cls:'av-bad',txt:'편중'};
+    if(maxPct>=40) return {cls:'av-bad',txt:'편중'};
+    if(maxPct>=33||spread>=Math.max(3,Math.ceil(answered*0.25))) return {cls:'av-warn',txt:'주의'};
+    if(spread<=1) return {cls:'av-good',txt:'균형'};
+    return {cls:'av-ok',txt:'양호'};
+  }
+  function adistHTML(counts,answered){
+    var s='';
+    for(var o=0;o<5;o++){ var pct=answered>0?Math.round(counts[o]/answered*100):0;
+      s+='<div class="acell"><span class="ao">'+CIRC[o]+'</span><span class="ac">'+counts[o]+'</span><span class="ap">'+pct+'%</span></div>'; }
+    return s;
+  }
+  function ranges2str(arr){
+    if(!arr.length) return '';
+    var out=[],s=arr[0],prev=arr[0];
+    for(var k=1;k<arr.length;k++){ if(arr[k]===prev+1){prev=arr[k];continue;} out.push(s===prev?(''+s):(s+'~'+prev)); s=arr[k];prev=arr[k]; }
+    out.push(s===prev?(''+s):(s+'~'+prev)); return out.join(', ');
+  }
+
+  function normalizedShares(){
+    var w=state.teachers.map(function(t){ return t.den>0? t.num/t.den:0; });
+    var s=w.reduce(function(a,b){return a+b;},0);
+    if(s<=0){ w=w.map(function(){return 1;}); s=w.length; }
+    return w.map(function(x){return x/s;});
+  }
+  function ensureAllocShape(){
+    var K=state.teachers.length;
+    if(!Array.isArray(state.alloc)) state.alloc=[];
+    if(!Array.isArray(state.avoid)) state.avoid=[];
+    while(state.alloc.length<K) state.alloc.push({});
+    while(state.avoid.length<K) state.avoid.push({});
+    state.alloc.length=K; state.avoid.length=K;
+    for(var i=0;i<K;i++){ if(!state.alloc[i]) state.alloc[i]={}; if(!state.avoid[i]) state.avoid[i]={}; }
+  }
+  function distributeTier(p,c,shares){
+    var K=state.teachers.length, elig=[];
+    for(var i=0;i<K;i++) if(!(state.avoid[i]&&state.avoid[i][p])) elig.push(i);
+    if(elig.length===0){ for(var j=0;j<K;j++) elig.push(j); }
+    var sub=elig.map(function(i){return shares[i];}), subsum=sub.reduce(function(a,b){return a+b;},0);
+    if(subsum<=0){ sub=elig.map(function(){return 1;}); subsum=elig.length; }
+    var raw=elig.map(function(i,k){return sub[k]/subsum*c;}), fl=raw.map(Math.floor);
+    var rem=c-fl.reduce(function(a,b){return a+b;},0);
+    var order=raw.map(function(r,k){return {k:k,f:r-fl[k]};}).sort(function(a,b){return b.f-a.f;});
+    for(var r=0;r<rem;r++) fl[order[r%order.length].k]++;
+    state.alloc.forEach(function(a){ if(a) delete a[p]; });
+    elig.forEach(function(ti,k){ if(fl[k]>0){ if(!state.alloc[ti]) state.alloc[ti]={}; state.alloc[ti][p]=fl[k]; } });
+  }
+  function autoAllocate(){
+    ensureAllocShape();
+    var qm=quotaMap(), shares=normalizedShares();
+    state.alloc=state.teachers.map(function(){return {};});
+    Object.keys(qm).map(Number).forEach(function(p){ distributeTier(p,qm[p],shares); });
+  }
+  function redistributeTier(p){ ensureAllocShape(); var qm=quotaMap(); distributeTier(p,qm[p]||0,normalizedShares()); }
+  function resetAllocAvoid(){ state.avoid=state.teachers.map(function(){return {};}); state.alloc=state.teachers.map(function(){return {};}); autoAllocate(); }
+
+  function renderSplit(){
+    var N=totalQ(), P=planTotal();
+    document.getElementById('splitBasis').textContent='기준: '+N+'문항 · '+P+'점';
+    document.getElementById('tCount').value=state.teachers.length;
+    document.querySelectorAll('#modeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.mode===state.splitMode); });
+    if(state.splitMode==='range') renderRange(N,P); else renderRatio(N,P);
+  }
+
+  function renderRange(N,P){
+    var box=document.getElementById('teachers'), foot=document.getElementById('splitFoot');
+    document.getElementById('splitNote').innerHTML='선생님별 <b>담당 문항 범위(몇 번~몇 번)</b>를 지정하면, 실제 입력된 배점·정답을 바탕으로 문항 수·점수 비율과 정답 번호 분포를 계산합니다.';
+    if(N===0){ box.innerHTML=''; foot.className='splitfoot warn'; foot.textContent='배점 구성을 먼저 입력해 주세요.'; return; }
+    box.innerHTML=state.ranges.map(function(r,i){
+      var st=rangeStats(r.start,r.end), chips='';
+      Object.keys(st.pts).map(Number).sort(function(x,y){return x-y;}).forEach(function(p){ chips+='<span class="tchip">'+p+'점 '+st.pts[p]+'</span>'; });
+      var assigned=Object.keys(st.pts).reduce(function(s,p){return s+st.pts[p];},0);
+      if(st.qc-assigned>0) chips+='<span class="tchip" style="background:#f1f4f8;color:#6b7c8f">배점미정 '+(st.qc-assigned)+'</span>';
+      if(!chips) chips='<span class="tchip" style="background:#f1f4f8;color:#6b7c8f">없음</span>';
+      var v=distVerdict(st.counts,st.answered);
+      var qR=N>0?(st.qc/N*100):0, pR=P>0?(st.pSum/P*100):0;
+      return '<div class="tcard" style="border-left:4px solid '+TCOLORS[i%6]+'"><div class="tcard-h">'+
+        '<span class="tbadge t'+((i%6)+1)+'">선생님 '+(i+1)+'</span>'+
+        '<div class="range"><input type="number" min="1" max="'+N+'" data-rs="'+i+'" value="'+(r.start>0?r.start:'')+'"><span>~</span>'+
+        '<input type="number" min="1" max="'+N+'" data-re="'+i+'" value="'+(r.start>0&&r.end>=r.start?r.end:'')+'"><span>번</span></div></div>'+
+        '<div class="tcard-main"><b>'+st.qc+'</b>문항 · <b>'+st.pSum+'</b>점</div>'+
+        '<div class="tratio">문항 비율 '+qR.toFixed(1)+'% · 점수 비율 '+pR.toFixed(1)+'%</div>'+
+        '<div class="tchips">'+chips+'</div>'+
+        '<div class="adist">'+adistHTML(st.counts,st.answered)+'</div>'+
+        '<div class="averdict '+v.cls+'">정답 분포 · '+v.txt+(st.answered>0?' ('+st.answered+'/'+st.qc+')':'')+'</div></div>';
+    }).join('');
+    box.querySelectorAll('input[data-rs]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.rs].start=Math.max(0,Math.min(N,+this.value||0)); renderSplit(); renderGrid(); }); });
+    box.querySelectorAll('input[data-re]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.re].end=Math.max(0,Math.min(N,+this.value||0)); renderSplit(); renderGrid(); }); });
+
+    var cover=[]; for(var k=0;k<N;k++) cover.push(0);
+    state.ranges.forEach(function(r){ if(r.start>0&&r.end>=r.start){ for(var k=r.start;k<=r.end&&k<=N;k++) cover[k-1]++; } });
+    var gaps=[], overlaps=[];
+    cover.forEach(function(c,k){ if(c===0) gaps.push(k+1); else if(c>1) overlaps.push(k+1); });
+    if(gaps.length===0&&overlaps.length===0){ foot.className='splitfoot'; foot.innerHTML='1~'+N+'번까지 빠짐없이, 겹침 없이 배정되었습니다 ✓'; }
+    else { foot.className='splitfoot warn'; var m=[]; if(gaps.length) m.push('누락 '+gaps.length+'문항('+ranges2str(gaps)+'번)'); if(overlaps.length) m.push('중복 '+overlaps.length+'문항('+ranges2str(overlaps)+'번)'); foot.innerHTML=m.join(' · '); }
+  }
+
+  function renderRatio(N,P){
+    var box=document.getElementById('teachers'), foot=document.getElementById('splitFoot');
+    document.getElementById('splitNote').innerHTML='분수로 목표 비율을 잡아 <b>자동 배분</b>하거나, 선생님별 <b>배점별 문항 수를 직접 조절</b>할 수 있어요. 특정 배점은 <b>제외</b>로 가급적 빼줍니다.';
+    if(N===0){ box.innerHTML=''; foot.className='splitfoot warn'; foot.textContent='배점 구성을 먼저 입력해 주세요.'; return; }
+    ensureAllocShape();
+    var qm=quotaMap(), tiers=Object.keys(qm).map(Number).sort(function(a,b){return a-b;});
+    var shares=normalizedShares();
+
+    var tbchips=tiers.map(function(p){
+      var asg=0; state.alloc.forEach(function(a){ asg+=(a&&a[p])||0; });
+      var cls=asg===qm[p]?'ok':(asg>qm[p]?'over':'under');
+      return '<span class="tb-chip '+cls+'">'+p+'점 '+asg+'/'+qm[p]+'</span>';
+    }).join('');
+    var tierbar='<div class="tierbar"><span style="font-size:12px;font-weight:800;color:#6b7c8f">배점별 배정</span>'+tbchips+'<button class="tb-auto" id="tbAuto">비율대로 자동 배분</button></div>';
+
+    var cards=state.teachers.map(function(t,i){
+      var a=state.alloc[i]||{}, qc=0, pt=0;
+      var rows=tiers.map(function(p){
+        var cnt=(a&&a[p])||0, av=!!(state.avoid[i]&&state.avoid[i][p]);
+        qc+=cnt; pt+=p*cnt;
+        return '<div class="ptrow'+(av?' avoided':'')+'">'+
+          '<span class="ptlab">'+p+'점</span>'+
+          '<input class="ptcount" type="number" min="0" max="'+qm[p]+'" data-ai="'+i+'" data-ap="'+p+'" value="'+cnt+'"'+(av?' disabled':'')+'>'+
+          '<button class="ptavoid'+(av?' on':'')+'" data-vi="'+i+'" data-vp="'+p+'">'+(av?'제외됨':'제외')+'</button>'+
+          '</div>';
+      }).join('');
+      var rr=P>0?(pt/P*100):0;
+      return '<div class="tcard"><div class="tcard-h">'+
+        '<span class="tbadge t'+((i%6)+1)+'">선생님 '+(i+1)+'</span>'+
+        '<div class="frac"><input type="number" min="0" max="99" data-tn="'+i+'" value="'+t.num+'"><span>/</span>'+
+        '<input type="number" min="1" max="99" data-td="'+i+'" value="'+t.den+'"></div>'+
+        '<span class="share">'+(shares[i]*100).toFixed(1)+'%</span></div>'+
+        '<div class="tcard-main"><b>'+qc+'</b>문항 · <b>'+pt+'</b>점 <span class="ratio-mini">(비율 '+rr.toFixed(1)+'%)</span></div>'+
+        '<div class="ttarget">목표 ≈ '+(shares[i]*N).toFixed(1)+'문항 · '+(shares[i]*P).toFixed(1)+'점</div>'+
+        '<div class="ptgrid">'+rows+'</div></div>';
+    }).join('');
+
+    box.innerHTML=tierbar+cards;
+
+    document.getElementById('tbAuto').addEventListener('click',function(){ autoAllocate(); renderSplit(); });
+    box.querySelectorAll('input[data-tn]').forEach(function(el){ el.addEventListener('change',function(){ state.teachers[+this.dataset.tn].num=Math.max(0,+this.value||0); renderSplit(); }); });
+    box.querySelectorAll('input[data-td]').forEach(function(el){ el.addEventListener('change',function(){ state.teachers[+this.dataset.td].den=Math.max(1,+this.value||1); renderSplit(); }); });
+    box.querySelectorAll('input.ptcount').forEach(function(el){ el.addEventListener('change',function(){
+      var i=+this.dataset.ai,p=+this.dataset.ap,v=Math.max(0,Math.min(qm[p]||0,+this.value||0));
+      if(!state.alloc[i]) state.alloc[i]={};
+      if(v>0) state.alloc[i][p]=v; else delete state.alloc[i][p];
+      renderSplit();
+    }); });
+    box.querySelectorAll('button.ptavoid').forEach(function(el){ el.addEventListener('click',function(){
+      var i=+this.dataset.vi,p=+this.dataset.vp;
+      if(!state.avoid[i]) state.avoid[i]={};
+      state.avoid[i][p]=!state.avoid[i][p];
+      redistributeTier(p); renderSplit();
+    }); });
+
+    var sQ=0,sP=0; state.alloc.forEach(function(a){ Object.keys(a).forEach(function(p){ sQ+=a[p]; sP+=(+p)*a[p]; }); });
+    var forced=[];
+    state.alloc.forEach(function(a,i){ Object.keys(a).forEach(function(p){ if(state.avoid[i]&&state.avoid[i][p]&&a[p]>0) forced.push('선생님'+(i+1)+' '+p+'점'); }); });
+    var ok=(sQ===N&&sP===P);
+    foot.className='splitfoot'+(ok&&forced.length===0?'':' warn');
+    var msg='배분 합계 '+sQ+'문항 · '+sP+'점 / 전체 '+N+'문항 · '+P+'점 — '+(ok?'일치 ✓':'배점별 배정을 맞춰 주세요');
+    if(forced.length) msg+=' · 회피 불가: '+forced.join(', ')+' (전원 회피로 부득이 배정)';
+    foot.innerHTML=msg;
+  }
+
+  function setTeachers(k){
+    k=Math.max(2,Math.min(6,k));
+    state.teachers=[]; for(var i=0;i<k;i++) state.teachers.push({num:1,den:k});
+    resetRanges(); resetAllocAvoid(); renderSplit(); renderGrid();
+  }
+
+  // ---------- 배점 구성표 ----------
+  function renderPlan(){
+    var p=document.getElementById('plan'); p.innerHTML='';
+    state.plan.forEach(function(r,idx){
+      var row=document.createElement('div'); row.className='planrow';
+      row.innerHTML =
+        '<input class="num" type="number" min="1" max="20" value="'+r.pts+'" data-pts="'+idx+'">'+
+        '<span class="u">점 ×</span>'+
+        '<input class="num" type="number" min="0" max="80" value="'+r.n+'" data-n="'+idx+'">'+
+        '<span class="u">문항</span>'+
+        '<span class="eq">= '+((r.pts||0)*(r.n||0))+'점</span>'+
+        '<button class="del" data-del="'+idx+'" title="삭제">✕</button>';
+      p.appendChild(row);
+    });
+    p.querySelectorAll('input[data-pts]').forEach(function(el){
+      el.addEventListener('change',function(){ state.plan[+this.dataset.pts].pts=Math.max(1,+this.value||1); onPlanChange(); });
+    });
+    p.querySelectorAll('input[data-n]').forEach(function(el){
+      el.addEventListener('change',function(){ state.plan[+this.dataset.n].n=Math.max(0,+this.value||0); onPlanChange(); });
+    });
+    p.querySelectorAll('button[data-del]').forEach(function(el){
+      el.addEventListener('click',function(){ if(state.plan.length>1){ state.plan.splice(+this.dataset.del,1); onPlanChange(); } });
+    });
+    document.getElementById('planSum').innerHTML='총 <b>'+totalQ()+'</b>문항 · <b>'+planTotal()+'</b>점';
+  }
+  function onPlanChange(){ resizeQ(); resetRanges(); resetAllocAvoid(); renderPlan(); renderGrid(); renderSplit(); compute(); }
+
+  // ---------- 문항 그리드 ----------
+  function renderGrid(){
+    var g=document.getElementById('qgrid'); g.innerHTML='';
+    var tiers=tiersSorted(), quota=quotaMap(), used=usedMap();
+    state.q.forEach(function(q,idx){
+      var card=document.createElement('div'); card.className='qcard'+(q.answer?' done':'');
+      if(state.splitMode==='range'){ var ow=ownerOf(idx); if(ow>=0) card.style.borderLeft='4px solid '+TCOLORS[ow%6]; }
+      var pbtns=tiers.map(function(p){
+        var remaining=(quota[p]||0)-(used[p]||0);
+        var disabled=(remaining<=0 && q.points!==p);
+        return '<button class="pbtn'+(q.points===p?' sel':'')+'" data-q="'+idx+'" data-p="'+p+'"'+(disabled?' disabled':'')+'>'+p+'점</button>';
+      }).join('');
+      var opts=[1,2,3,4,5].map(function(o){
+        return '<button class="opt'+(q.answer===o?' sel':'')+'" data-q="'+idx+'" data-o="'+o+'">'+CIRC[o-1]+'</button>';
+      }).join('');
+      card.innerHTML='<div class="qcard-top"><div class="qnum">'+(idx+1)+'</div><div class="ptsbtns">'+pbtns+'</div></div><div class="opts">'+opts+'</div>';
+      g.appendChild(card);
+    });
+    g.querySelectorAll('.opt').forEach(function(b){
+      b.addEventListener('click',function(){
+        var qi=+this.dataset.q,oi=+this.dataset.o;
+        state.q[qi].answer=(state.q[qi].answer===oi)?null:oi;
+        renderGrid(); compute();
+      });
+    });
+    g.querySelectorAll('.pbtn').forEach(function(b){
+      b.addEventListener('click',function(){
+        if(this.disabled) return;
+        var qi=+this.dataset.q,pp=+this.dataset.p;
+        state.q[qi].points=(state.q[qi].points===pp)?null:pp;
+        renderGrid(); compute();
+      });
+    });
+  }
+
+  // ---------- 계산 ----------
+  function compute(){
+    var n=state.q.length;
+    var answered=state.q.filter(function(q){return q.answer;}).length;
+    var assigned=state.q.filter(function(q){return q.points;}).length;
+    var assignedSum=state.q.reduce(function(s,q){return s+(q.points||0);},0);
+    var quota=quotaMap(), used=usedMap(), tiers=tiersSorted();
+
+    // 상단 현황바
+    var ac=document.getElementById('ansCount');
+    ac.innerHTML='<b>'+answered+'</b>/'+n; ac.className='big'+(answered===n&&n>0?' done':'');
+    var pc=document.getElementById('ptsCount');
+    pc.innerHTML='<b>'+assigned+'</b>/'+n; pc.className='big'+(assigned===n&&n>0?' done':'');
+    var st=document.getElementById('sbTotal');
+    st.innerHTML='<b>'+assignedSum+'</b>/'+planTotal(); st.className='big'+(assignedSum===planTotal()&&n>0?' done':'');
+    document.getElementById('tierChips').innerHTML=tiers.map(function(p){
+      var u=used[p]||0,q=quota[p]||0;
+      return '<span class="tier-chip'+(u>=q?' full':'')+'">'+p+'점 '+u+'/'+q+'</span>';
+    }).join('');
+
+    // 정답 분포
+    var counts=[0,0,0,0,0];
+    state.q.forEach(function(q){ if(q.answer) counts[q.answer-1]++; });
+    var maxC=Math.max.apply(null,counts);
+    var chart=document.getElementById('chart');
+    chart.innerHTML='<div class="ideal" style="bottom:'+(20/100*150+8)+'px"><span>균형선 20%</span></div>';
+    for(var o=0;o<5;o++){
+      var pct=answered>0?counts[o]/answered*100:0;
+      var h=Math.max(pct/100*150,counts[o]>0?6:0);
+      var hot=answered>0&&(counts[o]/answered>=0.30);
+      var col=document.createElement('div'); col.className='bar-col';
+      col.innerHTML='<div class="bar-val">'+(answered>0?Math.round(pct)+'%':'')+'</div>'+
+        '<div class="bar '+(counts[o]===0?'zero':(hot?'hot':''))+'" style="height:'+h+'px"></div>'+
+        '<div class="bar-lab">'+CIRC[o]+'</div>';
+      chart.appendChild(col);
+    }
+    var legend=document.getElementById('legend'); legend.innerHTML='';
+    for(var k=0;k<5;k++){
+      var pp=answered>0?Math.round(counts[k]/answered*100):0;
+      legend.innerHTML+='<div class="lg"><div class="o">'+CIRC[k]+'</div><div class="c">'+counts[k]+'개</div><div class="p">'+pp+'%</div></div>';
+    }
+
+    // 균형 판정
+    var vEl=document.getElementById('verdict'), vTx=document.getElementById('verdictText');
+    var cls='v-neutral', msg='정답을 입력해 주세요';
+    if(answered>0){
+      var spread=maxC-Math.min.apply(null,counts);
+      var hasZero=counts.indexOf(0)>-1;
+      var maxPct=maxC/answered*100;
+      if(hasZero&&answered>=10){ cls='v-bad'; msg='편중 · 정답으로 안 쓰인 번호가 있어요'; }
+      else if(maxPct>=35){ cls='v-bad'; msg='편중 · 특정 번호 비중이 너무 높아요'; }
+      else if(maxPct>=30||spread>=Math.max(4,Math.ceil(answered*0.18))){ cls='v-warn'; msg='조정 권장 · 분포가 다소 치우쳐요'; }
+      else if(spread<=2){ cls='v-good'; msg='매우 균형적 · 번호별 정답이 고르게 분포'; }
+      else { cls='v-ok'; msg='양호 · 큰 편중 없이 분포'; }
+      if(answered<n) msg+='  (미입력 '+(n-answered)+'개)';
+    }
+    vEl.className='verdict '+cls; vTx.textContent=msg;
+
+    // 배점 배정 현황 표
+    var rows='';
+    tiers.forEach(function(p){
+      var u=used[p]||0,q=quota[p]||0, full=u>=q;
+      rows+='<div class="row"><span class="k">'+p+'점</span><span class="v">'+u+' / '+q+'문항 · '+(p*u)+'점'+
+            (full?'<span class="chip chip-ok">소진</span>':'<span class="chip chip-no">'+(q-u)+'개 남음</span>')+'</span></div>';
+    });
+    var totMatch=(assignedSum===planTotal());
+    rows+='<div class="row total"><span class="k">배정 합계 ('+assigned+'/'+n+'문항)</span><span class="v">'+assignedSum+' / '+planTotal()+'점'+
+          (totMatch&&assigned===n?'<span class="chip chip-ok">완료</span>':'<span class="chip chip-no">진행 중</span>')+'</span></div>';
+    document.getElementById('ptsRows').innerHTML=rows;
+
+    // 경고/안내
+    var warns=[];
+    if(assigned<n) warns.push(['warn-amber','!','배점 미배정 '+(n-assigned)+'문항. "배점 자동 배정"을 쓰거나 직접 지정해 주세요.']);
+    if(answered>0&&answered<n) warns.push(['warn-blue','…','정답 미입력 '+(n-answered)+'문항이 남아 있어요.']);
+    // 연속 동일 정답 3개 이상
+    var runStart=0;
+    for(var r=1;r<=state.q.length;r++){
+      var cur=state.q[r]?state.q[r].answer:null, prev=state.q[r-1]?state.q[r-1].answer:null;
+      if(!(cur&&prev&&cur===prev)){
+        if(prev&&(r-runStart)>=3) warns.push(['warn-amber','↺',(runStart+1)+'~'+r+'번이 모두 '+CIRC[prev-1]+' 입니다. 연속 정답을 분산해 보세요.']);
+        runStart=r;
+      }
+    }
+    if(warns.length===0&&answered>0&&assigned===n) warns.push(['warn-green','✓','배점 구성과 정답 분포가 모두 안정적이에요. 출제 마무리하셔도 좋습니다.']);
+    document.getElementById('warns').innerHTML=warns.map(function(w){
+      return '<div class="warn '+w[0]+'"><span class="ic">'+w[1]+'</span><span>'+w[2]+'</span></div>';
+    }).join('');
+
+    if(state.splitMode==='range') renderSplit();
+  }
+
+  // ---------- 컨트롤 ----------
+  document.getElementById('recN').addEventListener('input',renderRecs);
+  document.getElementById('recT').addEventListener('input',renderRecs);
+  document.getElementById('tPlus').addEventListener('click',function(){ setTeachers(state.teachers.length+1); });
+  document.getElementById('tMinus').addEventListener('click',function(){ setTeachers(state.teachers.length-1); });
+  document.getElementById('modeSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; state.splitMode=b.dataset.mode; renderSplit(); renderGrid(); });
+  document.getElementById('addRow').addEventListener('click',function(){ state.plan.push({pts:1,n:1}); onPlanChange(); });
+  document.getElementById('autoPts').addEventListener('click',function(){
+    var exp=[]; state.plan.forEach(function(r){ for(var i=0;i<r.n;i++) exp.push(r.pts); });
+    state.q.forEach(function(q,idx){ q.points = (idx<exp.length)?exp[idx]:null; });
+    renderGrid(); compute();
+  });
+  document.getElementById('fillBtn').addEventListener('click',function(){
+    var n=state.q.length, base=[];
+    for(var i=0;i<n;i++) base.push((i%5)+1);
+    for(var j=base.length-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)); var t=base[j];base[j]=base[k];base[k]=t; }
+    state.q.forEach(function(q,idx){ q.answer=base[idx]; });
+    renderGrid(); compute();
+  });
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    state.q.forEach(function(q){ q.answer=null; q.points=null; });
+    renderGrid(); compute();
+  });
+  document.getElementById('saveBtn').addEventListener('click',function(){
+    var btn=this, old=btn.textContent; btn.textContent='저장 중…';
+    if(typeof html2canvas==='undefined'){ btn.textContent='저장 기능 사용 불가(오프라인)'; setTimeout(function(){btn.textContent=old;},2000); return; }
+    html2canvas(document.getElementById('resultCapture'),{scale:2,backgroundColor:'#FAFBFD'}).then(function(c){
+      var a=document.createElement('a'); a.download='송쌤과학_검증결과.png'; a.href=c.toDataURL('image/png'); a.click(); btn.textContent=old;
+    }).catch(function(){ btn.textContent='저장 실패'; setTimeout(function(){btn.textContent=old;},2000); });
+  });
+
+  // init
+  resizeQ();
+  (function(){ var exp=[]; state.plan.forEach(function(r){ for(var i=0;i<r.n;i++) exp.push(r.pts); }); state.q.forEach(function(q,idx){ q.points=(idx<exp.length)?exp[idx]:null; }); })();
+  resetRanges(); resetAllocAvoid();
+  renderPlan(); renderGrid(); renderRecs(); renderSplit(); compute();
+})();
+</script>
+</body>
+</html>
