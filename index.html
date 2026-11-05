@@ -350,8 +350,9 @@
   };
   var CIRC = ['①','②','③','④','⑤'];
 
+  function rnd(x){ return Math.round(x*1e6)/1e6; } // 소수 배점(예: 3.3점) 합계의 부동소수 오차 정리
   function totalQ(){ return state.plan.reduce(function(s,r){return s + (r.n||0);},0); }
-  function planTotal(){ return state.plan.reduce(function(s,r){return s + (r.pts||0)*(r.n||0);},0); }
+  function planTotal(){ return rnd(state.plan.reduce(function(s,r){return s + (r.pts||0)*(r.n||0);},0)); }
   function quotaMap(){ var m={}; state.plan.forEach(function(r){ if(r.pts>0&&r.n>0) m[r.pts]=(m[r.pts]||0)+r.n; }); return m; }
   function usedMap(){ var m={}; state.q.forEach(function(q){ if(q.points) m[q.points]=(m[q.points]||0)+1; }); return m; }
   function tiersSorted(){ return Object.keys(quotaMap()).map(Number).sort(function(a,b){return a-b;}); }
@@ -412,13 +413,13 @@
     return out.slice(0,3);
   }
   function renderRecs(){
-    var N=Math.max(1,Math.min(80,+document.getElementById('recN').value||0));
+    var N=Math.max(1,Math.min(80,Math.floor(+document.getElementById('recN').value||0)));
     var T=Math.max(1,+document.getElementById('recT').value||0);
     var box=document.getElementById('recs');
     var recs=generateRecs(N,T);
     if(!recs){
       var lo=Math.ceil(T/5), hi=Math.floor(T/2);
-      box.innerHTML='<div class="recmsg">이 문항 수로는 '+T+'점을 정수 배점(2~5점)으로 맞추기 어려워요. 권장 문항 수는 약 '+lo+'~'+hi+'문항입니다.</div>';
+      box.innerHTML='<div class="recmsg">이 문항 수로는 '+T+'점을 정수 배점(2~5점)으로 맞추기 어려워요.'+(lo<=hi?' 권장 문항 수는 약 '+lo+'~'+hi+'문항입니다.':'')+'</div>';
       return;
     }
     var tg={'균형형':'bal','변별형':'diff','단순형':'simple'};
@@ -466,7 +467,7 @@
         if(q.answer){ counts[q.answer-1]++; answered++; }
       }
     }
-    return {counts:counts,pts:pts,qc:qc,pSum:pSum,answered:answered};
+    return {counts:counts,pts:pts,qc:qc,pSum:rnd(pSum),answered:answered};
   }
   function distVerdict(counts,answered){
     if(answered===0) return {cls:'av-n',txt:'정답 미입력'};
@@ -557,8 +558,8 @@
         '<div class="adist">'+adistHTML(st.counts,st.answered)+'</div>'+
         '<div class="averdict '+v.cls+'">정답 분포 · '+v.txt+(st.answered>0?' ('+st.answered+'/'+st.qc+')':'')+'</div></div>';
     }).join('');
-    box.querySelectorAll('input[data-rs]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.rs].start=Math.max(0,Math.min(N,+this.value||0)); renderSplit(); renderGrid(); }); });
-    box.querySelectorAll('input[data-re]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.re].end=Math.max(0,Math.min(N,+this.value||0)); renderSplit(); renderGrid(); }); });
+    box.querySelectorAll('input[data-rs]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.rs].start=Math.max(0,Math.min(N,Math.floor(+this.value||0))); renderSplit(); renderGrid(); }); });
+    box.querySelectorAll('input[data-re]').forEach(function(el){ el.addEventListener('change',function(){ state.ranges[+this.dataset.re].end=Math.max(0,Math.min(N,Math.floor(+this.value||0))); renderSplit(); renderGrid(); }); });
 
     var cover=[]; for(var k=0;k<N;k++) cover.push(0);
     state.ranges.forEach(function(r){ if(r.start>0&&r.end>=r.start){ for(var k=r.start;k<=r.end&&k<=N;k++) cover[k-1]++; } });
@@ -600,7 +601,7 @@
         '<div class="frac"><input type="number" min="0" max="99" data-tn="'+i+'" value="'+t.num+'"><span>/</span>'+
         '<input type="number" min="1" max="99" data-td="'+i+'" value="'+t.den+'"></div>'+
         '<span class="share">'+(shares[i]*100).toFixed(1)+'%</span></div>'+
-        '<div class="tcard-main"><b>'+qc+'</b>문항 · <b>'+pt+'</b>점 <span class="ratio-mini">(비율 '+rr.toFixed(1)+'%)</span></div>'+
+        '<div class="tcard-main"><b>'+qc+'</b>문항 · <b>'+rnd(pt)+'</b>점 <span class="ratio-mini">(비율 '+rr.toFixed(1)+'%)</span></div>'+
         '<div class="ttarget">목표 ≈ '+(shares[i]*N).toFixed(1)+'문항 · '+(shares[i]*P).toFixed(1)+'점</div>'+
         '<div class="ptgrid">'+rows+'</div></div>';
     }).join('');
@@ -611,7 +612,7 @@
     box.querySelectorAll('input[data-tn]').forEach(function(el){ el.addEventListener('change',function(){ state.teachers[+this.dataset.tn].num=Math.max(0,+this.value||0); renderSplit(); }); });
     box.querySelectorAll('input[data-td]').forEach(function(el){ el.addEventListener('change',function(){ state.teachers[+this.dataset.td].den=Math.max(1,+this.value||1); renderSplit(); }); });
     box.querySelectorAll('input.ptcount').forEach(function(el){ el.addEventListener('change',function(){
-      var i=+this.dataset.ai,p=+this.dataset.ap,v=Math.max(0,Math.min(qm[p]||0,+this.value||0));
+      var i=+this.dataset.ai,p=+this.dataset.ap,v=Math.max(0,Math.min(qm[p]||0,Math.floor(+this.value||0)));
       if(!state.alloc[i]) state.alloc[i]={};
       if(v>0) state.alloc[i][p]=v; else delete state.alloc[i][p];
       renderSplit();
@@ -623,7 +624,7 @@
       redistributeTier(p); renderSplit();
     }); });
 
-    var sQ=0,sP=0; state.alloc.forEach(function(a){ Object.keys(a).forEach(function(p){ sQ+=a[p]; sP+=(+p)*a[p]; }); });
+    var sQ=0,sP=0; state.alloc.forEach(function(a){ Object.keys(a).forEach(function(p){ sQ+=a[p]; sP+=(+p)*a[p]; }); }); sP=rnd(sP);
     var forced=[];
     state.alloc.forEach(function(a,i){ Object.keys(a).forEach(function(p){ if(state.avoid[i]&&state.avoid[i][p]&&a[p]>0) forced.push('선생님'+(i+1)+' '+p+'점'); }); });
     var ok=(sQ===N&&sP===P);
@@ -649,7 +650,7 @@
         '<span class="u">점 ×</span>'+
         '<input class="num" type="number" min="0" max="80" value="'+r.n+'" data-n="'+idx+'">'+
         '<span class="u">문항</span>'+
-        '<span class="eq">= '+((r.pts||0)*(r.n||0))+'점</span>'+
+        '<span class="eq">= '+rnd((r.pts||0)*(r.n||0))+'점</span>'+
         '<button class="del" data-del="'+idx+'" title="삭제">✕</button>';
       p.appendChild(row);
     });
@@ -657,7 +658,7 @@
       el.addEventListener('change',function(){ state.plan[+this.dataset.pts].pts=Math.max(1,+this.value||1); onPlanChange(); });
     });
     p.querySelectorAll('input[data-n]').forEach(function(el){
-      el.addEventListener('change',function(){ state.plan[+this.dataset.n].n=Math.max(0,+this.value||0); onPlanChange(); });
+      el.addEventListener('change',function(){ state.plan[+this.dataset.n].n=Math.max(0,Math.min(80,Math.floor(+this.value||0))); onPlanChange(); });
     });
     p.querySelectorAll('button[data-del]').forEach(function(el){
       el.addEventListener('click',function(){ if(state.plan.length>1){ state.plan.splice(+this.dataset.del,1); onPlanChange(); } });
@@ -706,7 +707,7 @@
     var n=state.q.length;
     var answered=state.q.filter(function(q){return q.answer;}).length;
     var assigned=state.q.filter(function(q){return q.points;}).length;
-    var assignedSum=state.q.reduce(function(s,q){return s+(q.points||0);},0);
+    var assignedSum=rnd(state.q.reduce(function(s,q){return s+(q.points||0);},0));
     var quota=quotaMap(), used=usedMap(), tiers=tiersSorted();
 
     // 상단 현황바
@@ -737,6 +738,8 @@
         '<div class="bar-lab">'+CIRC[o]+'</div>';
       chart.appendChild(col);
     }
+    var bar0=chart.querySelector('.bar'); // 균형선을 막대 바닥(번호 라벨 위) 기준 20% 높이에 맞춤
+    if(bar0) chart.querySelector('.ideal').style.bottom=(chart.getBoundingClientRect().bottom-bar0.getBoundingClientRect().bottom+20/100*150)+'px';
     var legend=document.getElementById('legend'); legend.innerHTML='';
     for(var k=0;k<5;k++){
       var pp=answered>0?Math.round(counts[k]/answered*100):0;
@@ -763,7 +766,7 @@
     var rows='';
     tiers.forEach(function(p){
       var u=used[p]||0,q=quota[p]||0, full=u>=q;
-      rows+='<div class="row"><span class="k">'+p+'점</span><span class="v">'+u+' / '+q+'문항 · '+(p*u)+'점'+
+      rows+='<div class="row"><span class="k">'+p+'점</span><span class="v">'+u+' / '+q+'문항 · '+rnd(p*u)+'점'+
             (full?'<span class="chip chip-ok">소진</span>':'<span class="chip chip-no">'+(q-u)+'개 남음</span>')+'</span></div>';
     });
     var totMatch=(assignedSum===planTotal());
@@ -784,7 +787,7 @@
         runStart=r;
       }
     }
-    if(warns.length===0&&answered>0&&assigned===n) warns.push(['warn-green','✓','배점 구성과 정답 분포가 모두 안정적이에요. 출제 마무리하셔도 좋습니다.']);
+    if(warns.length===0&&answered>0&&assigned===n&&(cls==='v-good'||cls==='v-ok')) warns.push(['warn-green','✓','배점 구성과 정답 분포가 모두 안정적이에요. 출제 마무리하셔도 좋습니다.']);
     document.getElementById('warns').innerHTML=warns.map(function(w){
       return '<div class="warn '+w[0]+'"><span class="ic">'+w[1]+'</span><span>'+w[2]+'</span></div>';
     }).join('');
